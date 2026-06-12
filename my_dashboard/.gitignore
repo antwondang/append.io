@@ -1,3 +1,6 @@
+# Local environment config (never commit real keys)
+env.json
+
 # Miscellaneous
 *.class
 *.log
