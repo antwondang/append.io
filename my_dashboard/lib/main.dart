@@ -1,28 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const DashboardApp());
+import 'config/app_config.dart';
+import 'screens/home_shell.dart';
+import 'theme/app_theme.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (AppConfig.isSupabaseConfigured) {
+    await Supabase.initialize(
+      url: AppConfig.supabaseUrl,
+      publishableKey: AppConfig.supabaseAnonKey,
+    );
+    // Frictionless start: anonymous session so RLS-scoped data works
+    // immediately. Swap for real email/social auth before launch.
+    // (Enable "Anonymous sign-ins" under Auth settings in Supabase.)
+    final auth = Supabase.instance.client.auth;
+    if (auth.currentSession == null) {
+      try {
+        await auth.signInAnonymously();
+      } catch (e) {
+        debugPrint('Anonymous sign-in failed: $e');
+      }
+    }
+  }
+
+  runApp(const AppendApp());
 }
 
-class DashboardApp extends StatelessWidget {
-  const DashboardApp({super.key});
+class AppendApp extends StatelessWidget {
+  const AppendApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Plaid Portfolio Dashboard',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Colors.teal,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            "Ready to connect to Plaid!",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
+      title: 'append.io',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark(),
+      home: const HomeShell(),
     );
   }
 }
